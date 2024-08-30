@@ -39,10 +39,9 @@ class _FlashfyState extends State<Flashfy> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
-      startAutoOffTimer();
+      saveRemainingTime();
     } else if (state == AppLifecycleState.resumed) {
-      autoOffTimer?.cancel();
-      checkFlashlightState();
+      restoreRemainingTime();
     }
   }
 
@@ -52,6 +51,7 @@ class _FlashfyState extends State<Flashfy> with WidgetsBindingObserver {
       isFlashOn = prefs.getBool('isFlashOn') ?? false;
       int? savedDuration = prefs.getInt('autoOffDuration');
       autoOffDuration = durationOptions.contains(savedDuration) ? savedDuration : null;
+      remainingTime = prefs.getInt('remainingTime') ?? (autoOffDuration ?? 0);
       if (isFlashOn) {
         controller.toggle();
         startAutoOffTimer();
@@ -68,6 +68,7 @@ class _FlashfyState extends State<Flashfy> with WidgetsBindingObserver {
     } else {
       await prefs.remove('autoOffDuration');
     }
+    await prefs.setInt('remainingTime', remainingTime);
   }
 
   void toggleFlash() {
@@ -89,20 +90,17 @@ class _FlashfyState extends State<Flashfy> with WidgetsBindingObserver {
     autoOffTimer?.cancel();
     countdownTimer?.cancel();
     if (autoOffDuration != null) {
-      remainingTime = autoOffDuration!;
-      autoOffTimer = Timer(Duration(seconds: autoOffDuration!), () {
+      autoOffTimer = Timer(Duration(seconds: remainingTime), () {
         if (isFlashOn) {
           toggleFlash();
         }
       });
       startCountdown();
-    } else {
-      remainingTime = 0;
     }
   }
 
   void startCountdown() {
-    countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+    countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         if (remainingTime > 0) {
           remainingTime--;
@@ -116,6 +114,7 @@ class _FlashfyState extends State<Flashfy> with WidgetsBindingObserver {
   void setAutoOffDuration(int? seconds) {
     setState(() {
       autoOffDuration = seconds;
+      remainingTime = seconds ?? 0;
       saveFlashState();
       if (isFlashOn) {
         startAutoOffTimer();
@@ -141,9 +140,22 @@ class _FlashfyState extends State<Flashfy> with WidgetsBindingObserver {
   }
 
   void startPeriodicCheck() {
-    Timer.periodic(Duration(seconds: 5), (timer) {
+    Timer.periodic(const Duration(seconds: 5), (timer) {
       checkFlashlightState();
     });
+  }
+
+  void saveRemainingTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('remainingTime', remainingTime);
+  }
+
+  void restoreRemainingTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    remainingTime = prefs.getInt('remainingTime') ?? (autoOffDuration ?? 0);
+    if (isFlashOn) {
+      startAutoOffTimer();
+    }
   }
 
   String formatDuration(int totalSeconds) {
@@ -167,13 +179,13 @@ class _FlashfyState extends State<Flashfy> with WidgetsBindingObserver {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.timer),
+            icon: const Icon(Icons.timer),
             onPressed: () {
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: Text("Set Auto-Off Timer"),
+                    title: const Text("Set Auto-Off Timer"),
                     content: DropdownButton<int?>(
                       value: autoOffDuration,
                       items: durationOptions.map((int? value) {
@@ -219,14 +231,14 @@ class _FlashfyState extends State<Flashfy> with WidgetsBindingObserver {
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Text(
                     isFlashOn
                         ? autoOffDuration != null
                         ? "Auto-off in: ${formatDuration(remainingTime)}"
                         : "No auto-off time limit"
                         : "Flashlight is off",
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ],
               ),
