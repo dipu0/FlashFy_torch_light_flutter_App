@@ -1,4 +1,4 @@
-import 'package:flashfy/flashfyActivity.dart';
+import 'package:flashfy/flashfy_activity.dart';
 import 'package:flutter/material.dart';
 import 'package:torch_controller/torch_controller.dart';
 
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
         useMaterial3: true,
       ),
-      home: flashfy(),
+      home: const flashfy(),
     );
   }
 }

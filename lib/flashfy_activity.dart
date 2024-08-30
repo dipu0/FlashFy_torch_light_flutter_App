@@ -16,11 +16,11 @@ class _flashfyState extends State<flashfy> {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: Color(0xff292727),
+      backgroundColor: const Color(0xff292727),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0.0,
-        title: Text(
+        title: const Text(
           "FlashFy",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
@@ -61,7 +61,7 @@ class _flashfyState extends State<flashfy> {
             ),
           ),
         )),
-        Text(
+        const Text(
           "Developed By Chowdhury Elab",
           style: TextStyle(
               color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14.0),
