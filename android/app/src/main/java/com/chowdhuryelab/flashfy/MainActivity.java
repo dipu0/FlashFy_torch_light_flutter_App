@@ -1,4 +1,4 @@
-package com.chowdhuryelab.flashfy.flashfy;
+package com.chowdhuryelab.flashfy;
 
 import io.flutter.embedding.android.FlutterActivity;
 
