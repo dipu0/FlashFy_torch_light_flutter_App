@@ -1,6 +1,7 @@
 import 'package:flashfy/flashfy_activity.dart';
 import 'package:flutter/material.dart';
 import 'package:torch_controller/torch_controller.dart';
+import 'package:home_widget/home_widget.dart';
 
 void main() {
   TorchController().initialize();
@@ -20,7 +21,21 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
         useMaterial3: true,
       ),
-      home: const flashfy(),
+      home: const Flashfy(),
+    );
+  }
+}
+
+Future<void> backgroundCallback(Uri? uri) async {
+  if (uri?.host == 'toggleflashlight') {
+    final controller = TorchController();
+    bool isOn = await HomeWidget.getWidgetData<bool>('flashlight_state') ?? false;
+    isOn = !isOn;
+    controller.toggle();
+    await HomeWidget.saveWidgetData<bool>('flashlight_state', isOn);
+    await HomeWidget.updateWidget(
+      name: 'FlashlightWidgetProvider',
+      iOSName: 'FlashlightWidget',
     );
   }
 }
