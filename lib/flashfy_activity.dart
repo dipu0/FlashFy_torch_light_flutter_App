@@ -89,13 +89,22 @@ class _FlashfyState extends State<Flashfy> with WidgetsBindingObserver {
   void startAutoOffTimer() {
     autoOffTimer?.cancel();
     countdownTimer?.cancel();
+
     if (autoOffDuration != null) {
-      autoOffTimer = Timer(Duration(seconds: remainingTime), () {
+      remainingTime = autoOffDuration!;
+      autoOffTimer = Timer(Duration(seconds: remainingTime), () async {
         if (isFlashOn) {
-          toggleFlash();
+          await controller.toggle();
+          setState(() {
+            isFlashOn = false;
+            remainingTime = 0;
+            saveFlashState();
+          });
         }
       });
       startCountdown();
+    } else {
+      remainingTime = 0;
     }
   }
 
